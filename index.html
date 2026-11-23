@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>다섯 나라의 대륙</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Song+Myung&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 오래된 연대기를 펼치는 듯한, 낮고 묵직한 서사의 목소리
+   IDEA: 탐험가가 들고 다니는 채색 지도첩 — 지도를 짚으면 해당 땅의 기록이 펼쳐진다
+   PICTURE: 거친 해안선의 대륙 지도, 다섯 나라와 네 개의 미지의 땅, 빛나는 교역로와 떠다니는 불티
+   COLOUR and TYPE: 밤의 먹색 바탕, 양피지빛 글자, 불씨 같은 주홍 강조, 나라마다 고유색 / Song Myung + Gowun Batang
+   LAYOUT: 제목 → 큰 지도와 기록 패널 → 다섯 나라 카드 → 미지의 땅 → 종족 → 맺음말 */
+:root{color-scheme:dark;--bg:#0c1110;--bg2:#121a18;--land:#1c2522;--ink:#ece4d2;--mute:#a9a493;--line:rgba(236,228,210,.14);--acc:#e0604a}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.7 "Gowun Batang",serif;overflow-x:clip}
+#motes{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+main,header,footer{position:relative;z-index:1}
+h1,h2,h3{font-family:"Song Myung",serif;font-weight:400;line-height:1.1;text-wrap:balance;margin:0}
+h2{font-size:clamp(32px,5vw,48px)}
+h3{font-size:26px}
+p{margin:0}
+.band{padding:clamp(28px,4vw,64px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+nav{position:sticky;top:0;z-index:5;background:rgba(12,17,16,.82);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:6px 20px;align-items:center;flex-wrap:wrap;padding:10px max(5vw,16px)}
+nav b{font-family:"Song Myung";font-weight:400;font-size:20px;margin-right:auto}
+nav a{color:var(--mute);text-decoration:none;padding:10px 4px;min-height:44px;display:inline-flex;align-items:center}
+nav a:hover,nav a:focus-visible{color:var(--ink)}
+a:focus-visible,button:focus-visible,.rg:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.hero{text-align:center;padding-bottom:12px}
+.hero h1{font-size:clamp(40px,7vw,76px);background:linear-gradient(100deg,#ece4d2 30%,#f6c9a8 45%,#ece4d2 60%) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 7s linear infinite}
+@keyframes shine{to{background-position:-250% 0}}
+.hero p{color:var(--mute);margin:14px auto 0;max-width:38em}
+.atlas{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
+.fig{position:relative;height:clamp(340px,66vw,760px);border:1px solid var(--line);border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#13201f,#080c0c 75%);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.fig.drag{cursor:grabbing}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.zoom{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:6px;z-index:2}
+.zoom button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:rgba(12,17,16,.85);color:var(--ink);font:22px/1 "Gowun Batang",serif;cursor:pointer}
+.zoom button:hover{border-color:var(--acc)}
+.maphint{position:absolute;left:12px;bottom:10px;font-size:13px;color:var(--mute);background:rgba(12,17,16,.75);padding:4px 10px;border-radius:99px;pointer-events:none}
+.rg{cursor:pointer;transition:fill-opacity .3s,filter .3s;fill-opacity:.42;stroke-width:2;outline:none}
+.rg:hover,.rg.on{fill-opacity:.85;filter:drop-shadow(0 0 10px var(--c))}
+.lbl{font-family:"Song Myung";font-size:20px;fill:#f3ecdc;paint-order:stroke;stroke:#0c1110;stroke-width:5px;pointer-events:none;text-anchor:middle}
+.lbl.sm{font-size:16px;fill:#cfc6b2}
+.route{fill:none;stroke:#f2c58a;stroke-width:2;stroke-dasharray:6 8;opacity:.7;animation:flow 3s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-56}}
+.pulse{animation:pulse 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{50%{transform:scale(1.7);opacity:.2}}
+.panel{border:1px solid var(--line);border-radius:14px;padding:24px;background:linear-gradient(160deg,var(--bg2),#0c1110);display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.panel::before{content:"";position:absolute;inset:-40% -40% auto auto;width:260px;height:260px;border-radius:50%;background:var(--pc,#e0604a);opacity:.16;filter:blur(40px);transition:background .5s}
+.panel .kind{color:var(--pc);font-size:15px}
+.panel h3{font-size:36px}
+.panel.swap{animation:fade .45s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags span{border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:14px;color:var(--mute)}
+.hint{font-size:14px;color:var(--mute)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.chips button{font:inherit;font-size:14px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:99px;padding:8px 14px;min-height:44px;cursor:pointer}
+.chips button[aria-pressed=true]{border-color:var(--c);background:color-mix(in srgb,var(--c) 22%,transparent)}
+@media(min-width:900px){.panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:32px}.panel>*{grid-column:1}.panel .chips{grid-column:2;grid-row:1/span 6;align-content:start;margin:0}}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:28px}
+.head p{color:var(--mute);max-width:34em}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+.card{position:relative;border:1px solid var(--line);border-radius:14px;padding:24px;background:var(--bg2);overflow:hidden;transition:transform .2s ease,border-color .3s;transform:perspective(800px) rotateX(var(--rx,0)) rotateY(var(--ry,0))}
+.card:hover{border-color:color-mix(in srgb,var(--c) 60%,transparent)}
+.card::after{content:"";position:absolute;inset:0;background:radial-gradient(400px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb,var(--c) 22%,transparent),transparent 60%);pointer-events:none}
+.crest{width:56px;height:56px;margin-bottom:14px}
+.card .kind{color:var(--c);font-size:15px;margin-bottom:4px}
+.card p{color:#d6cfbd;margin:12px 0 16px}
+.stat{display:grid;grid-template-columns:3.5em minmax(0,1fr);gap:10px;align-items:center;font-size:14px;color:var(--mute);margin-top:6px}
+.bar{height:6px;border-radius:9px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--c);border-radius:9px;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.in .bar i{width:var(--w)}
+.note{font-size:13px;color:var(--mute);margin-top:18px}
+.lands{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:18px}
+.land{border-radius:14px;padding:26px 24px;min-height:280px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 26%,#0c1110),#0c1110 75%)}
+.land svg{position:absolute;right:-10px;top:-10px;width:150px;height:150px;opacity:.35}
+.land .where{font-size:14px;color:var(--c)}
+.land p{color:#d6cfbd}
+.danger{display:flex;gap:4px;margin-top:auto;align-items:center;font-size:14px;color:var(--mute)}
+.danger i{width:14px;height:14px;transform:rotate(45deg);border:1px solid var(--c)}
+.danger i.f{background:var(--c)}
+.races{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:0;border-top:1px solid var(--line)}
+.race{padding:22px 18px 22px 0;border-bottom:1px solid var(--line)}
+.race h3{font-size:24px;margin-bottom:6px;color:var(--c)}
+.race p{color:#d6cfbd;font-size:16px}
+.finale{text-align:center;padding-block:clamp(60px,10vw,120px);background:radial-gradient(ellipse at 50% 100%,rgba(224,96,74,.22),transparent 65%)}
+.finale h2{font-size:clamp(34px,6vw,60px);max-width:16em;margin:0 auto}
+.finale p{color:var(--mute);margin-top:18px}
+footer{border-top:1px solid var(--line);color:var(--mute);font-size:14px;text-align:center;padding:24px 16px}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+.rv.in{opacity:1;transform:none}
+@media(max-width:860px){.atlas{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.lbl{font-size:26px}.lbl.sm{font-size:22px}.panel h3{font-size:30px}nav b{width:100%}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}.in .bar i,.bar i{width:var(--w)}}
+</style>
+</head>
+<body>
+<canvas id="motes" aria-hidden="true"></canvas>
+<nav><div class="wrap"><b>다섯 나라의 대륙</b><a href="#map">지도</a><a href="#nations">다섯 나라</a><a href="#lands">미지의 땅</a><a href="#races">종족과 마수</a></div></nav>
+<main>
+<header class="band hero"><div class="wrap">
+<h1>다섯 나라의 대륙</h1>
+<p>제국과 왕국, 숲과 광산, 오염된 땅과 얼어붙은 북방. 거대한 대륙 위에서 모두가 누군가의 최고가 되기 위해 움직인다.</p>
+</div></header>
+
+<section class="band" id="map" style="padding-top:12px"><div class="wrap atlas">
+<div class="fig" id="fig"><div class="zoom"><button type="button" id="zin" aria-label="확대">+</button><button type="button" id="zout" aria-label="축소">−</button><button type="button" id="zreset" aria-label="전체 보기" style="font-size:17px">⟲</button></div><span class="maphint">끌어서 이동 · 두 손가락이나 휠로 확대</span><svg id="mapsvg" viewBox="0 0 1000 700" role="img" aria-label="대륙 지도">
+<defs>
+<filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="3" seed="7"/><feDisplacementMap in="SourceGraphic" scale="14"/></filter>
+<radialGradient id="landg" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#2a3530"/><stop offset="1" stop-color="#18201d"/></radialGradient>
+<pattern id="waves" width="60" height="24" patternUnits="userSpaceOnUse"><path d="M0 12q15-9 30 0t30 0" fill="none" stroke="#2b4a4c" stroke-width="1.2" opacity=".5"/></pattern>
+</defs>
+<rect x="-600" y="-400" width="2200" height="1500" fill="url(#waves)"/>
+<polygon filter="url(#rough)" fill="#000" opacity=".5" transform="translate(8 14)" points="95,210 150,120 260,80 420,55 600,60 760,90 880,150 935,250 920,380 950,470 890,560 760,620 640,665 470,670 330,640 220,590 140,520 85,420 70,320"/>
+<polygon filter="url(#rough)" fill="url(#landg)" stroke="#5b6b60" stroke-width="2" points="95,210 150,120 260,80 420,55 600,60 760,90 880,150 935,250 920,380 950,470 890,560 760,620 640,665 470,670 330,640 220,590 140,520 85,420 70,320"/>
+<g id="regions" filter="url(#rough)"></g>
+<g id="routes"></g>
+<g id="labels"></g>
+<g transform="translate(70 610)" opacity=".75"><circle r="34" fill="none" stroke="#a9a493"/><path d="M0-44 6-6 0 0-6-6Z" fill="#e0604a"/><path d="M0 44 6 6 0 0-6 6Z" fill="#a9a493"/><path d="M-44 0-6-6 0 0-6 6ZM44 0 6-6 0 0 6 6Z" fill="#a9a493"/><text y="-50" class="lbl sm" style="font-size:16px">북</text></g>
+</svg></div>
+<aside class="panel" id="panel" aria-live="polite"></aside>
+</div></section>
+
+<section class="band" id="nations"><div class="wrap">
+<div class="head rv"><h2>다섯 나라</h2><p>대륙의 중심부를 나눠 가진 두 제국과 세 왕국. 힘, 말, 질서, 탐욕, 기술이 서로를 견제한다.</p></div>
+<div class="grid" id="ncards"></div>
+<p class="note">능력치는 설정을 바탕으로 한 비교용 해석이에요.</p>
+</div></section>
+
+<section class="band" id="lands" style="background:linear-gradient(180deg,transparent,#0a0f0e 30%,#0a0f0e 70%,transparent)"><div class="wrap">
+<div class="head rv"><h2>미지의 땅</h2><p>나라의 국경 밖, 인간의 법이 닿지 않는 네 곳. 모험가와 야심가들이 끝내 향하게 되는 땅이다.</p></div>
+<div class="lands" id="lcards"></div>
+</div></section>
+
+<section class="band" id="races"><div class="wrap">
+<div class="head rv"><h2>종족과 마수</h2><p>거대한 대륙인 만큼 인간만이 주인은 아니다.</p></div>
+<div class="races rv" id="rlist"></div>
+</div></section>
+
+<section class="band finale"><div class="wrap rv">
+<h2>이곳은 방대하며, 누군가의 최고가 되기 위해 움직인다.</h2>
+<p>당신은 어느 땅에서 이야기를 시작하겠는가.</p>
+</div></section>
+</main>
+<footer>다섯 나라의 대륙 · 세계관 설정집</footer>
+
+<script>
+{
+const N=[
+{id:'brins',name:'브린스 제국',kind:'제국 · 무력',c:'#d4483c',pts:'300,195 405,170 520,182 560,200 555,300 470,320 380,305 310,260',lx:435,ly:250,
+ desc:'싸움을 좋아하며 강한 이들이 많은 나라. 힘이 곧 지위가 되고, 대륙 전역의 강자들이 이름을 걸고 모여든다.',tags:['호전적','강자 우대','북방과 맞닿음'],s:[5,1,3,3]},
+{id:'ashurim',name:'아슈림 제국',kind:'제국 · 외교',c:'#d6a650',pts:'565,195 645,170 760,195 752,265 765,355 680,375 600,345 560,300',lx:660,ly:280,
+ desc:'야망은 거대하지만 그것을 뒷받침할 힘은 없다. 그래서 칼 대신 말로 싸우며, 외교에 능한 나라가 되었다.',tags:['거대한 야망','외교 강국','힘의 부족'],s:[2,5,3,2]},
+{id:'abital',name:'아비탈 왕국',kind:'왕국 · 안정',c:'#5aa6d2',pts:'385,315 470,325 560,305 605,350 590,430 500,460 410,440 380,380',lx:492,ly:390,
+ desc:'다섯 나라 가운데 치안이 가장 좋고 민심도 가장 좋은 나라. 대륙 한가운데에서 드물게 평온을 누린다.',tags:['최고의 치안','두터운 민심','대륙의 중심'],s:[3,3,5,3]},
+{id:'rubechi',name:'루베치 왕국',kind:'왕국 · 혼란',c:'#b9628a',pts:'600,355 680,382 765,365 780,460 760,560 650,560 590,520 595,440',lx:680,ly:470,
+ desc:'부정부패가 심하고, 8년에 한 번꼴로 쿠데타가 일어난다. 왕좌의 주인은 자주 바뀌지만 썩은 뿌리는 바뀌지 않는다.',tags:['부정부패','8년 주기 쿠데타','불안한 왕좌'],s:[3,2,1,2]},
+{id:'druster',name:'드루스터 왕국',kind:'왕국 · 기술',c:'#d98a4e',pts:'300,270 375,312 378,385 405,450 395,545 330,575 270,520 300,445 292,350',lx:338,ly:440,
+ desc:'엘프, 드워프와의 외교를 강화해 장비와 기술력이 뛰어나다. 수많은 모험가들이 찾아오는 모험의 관문.',tags:['엘프·드워프 동맹','최고의 장비','모험가의 나라'],s:[3,4,3,5]}];
+const L=[
+{id:'ygg',name:'위그드라실',kind:'엘프의 거대한 숲',where:'대륙 서부',c:'#6fb46a',pts:'100,225 190,195 285,185 300,260 285,350 295,440 250,500 160,515 100,420 82,320',lx:190,ly:355,
+ desc:'엘프들이 지배하는 거대한 숲. 허락 없이 들어선 자는 숲이 먼저 알아차린다.',tags:['엘프의 영역','드루스터와 교류'],d:3,icon:'tree'},
+{id:'nida',name:'니다벨리르',kind:'드워프의 광산이자 미궁',where:'남부',c:'#b8936a',pts:'330,600 420,572 520,586 620,570 720,590 760,618 640,660 470,662 340,635',lx:545,ly:628,
+ desc:'드워프들이 생활하는 남부의 거대한 광산이자 미궁. 깊이 내려갈수록 길은 얽히고 보물과 위험은 함께 커진다.',tags:['드워프의 터전','미궁','드루스터와 교류'],d:4,icon:'mine'},
+{id:'mus',name:'무스펠헤임',kind:'오염된 마수의 땅',where:'대륙 동부',c:'#c2cf45',pts:'800,185 870,165 925,255 912,380 940,465 885,545 800,560 762,470 778,360 757,260',lx:852,ly:370,
+ desc:'강한 마수들이 들끓는 오염된 지역. 대륙에서 가장 위험한 땅으로, 살아 돌아온 자의 이야기는 늘 과장이 아니다.',tags:['강력한 마수','오염 지대'],d:5,icon:'flame'},
+{id:'nif',name:'니플헤임',kind:'혹한의 북방',where:'대륙 북부',c:'#a9dbef',pts:'160,125 265,85 420,62 600,66 755,96 860,152 790,175 640,158 520,172 400,160 280,178 190,190',lx:510,ly:122,
+ desc:'추운 북쪽, 혹독한 환경의 땅. 그곳에 강한 전사들이 있을 거라는 소문만이 남쪽으로 전해진다.',tags:['혹독한 추위','소문 속 전사들'],d:4,icon:'snow'}];
+const ALL=[...N,...L];
+const R=[
+{n:'인간',c:'#ece4d2',p:'다섯 나라를 세운 대륙 중심부의 주인. 무력, 외교, 질서, 기술로 저마다 다른 길을 걷는다.'},
+{n:'엘프',c:'#6fb46a',p:'서부의 숲 위그드라실을 지배한다. 드루스터 왕국과의 외교로 인간 세계와 이어져 있다.'},
+{n:'드워프',c:'#b8936a',p:'남부의 광산이자 미궁 니다벨리르에서 살아간다. 드루스터의 뛰어난 장비 뒤에는 그들의 손이 있다.'},
+{n:'마수',c:'#c2cf45',p:'대륙 곳곳에 존재하며, 특히 오염된 무스펠헤임에는 강한 마수들이 들끓는다.'},
+{n:'북방의 전사들',c:'#a9dbef',p:'니플헤임에 있다고 전해지는 강한 전사들. 실체를 본 자는 드물다.'}];
+const SN=['무력','외교','치안','기술'];
+const $=s=>document.querySelector(s);
+const NS='http://www.w3.org/2000/svg';
+
+/* 지도 */
+const rg=$('#regions'),lb=$('#labels');
+const order=[...L,...N];
+rg.innerHTML=order.map(r=>`<polygon class="rg" tabindex="0" role="button" aria-label="${r.name}" data-id="${r.id}" points="${r.pts}" fill="${r.c}" stroke="${r.c}" style="--c:${r.c}"/>`).join('');
+lb.innerHTML=order.map(r=>`<circle cx="${r.lx}" cy="${r.ly+14}" r="4" fill="${r.c}" class="pulse" style="pointer-events:none"/><text class="lbl${N.includes(r)?'':' sm'}" x="${r.lx}" y="${r.ly}">${r.name}</text>`).join('');
+$('#routes').innerHTML=['M338 450 Q260 420 200 380','M345 500 Q420 600 520 620','M660 285 Q560 250 450 255','M660 285 Q580 360 495 395'].map(d=>`<path class="route" d="${d}"/>`).join('');
+
+const panel=$('#panel');
+function show(id){
+  const r=ALL.find(x=>x.id===id); if(!r) return;
+  document.querySelectorAll('.rg').forEach(p=>p.classList.toggle('on',p.dataset.id===id));
+  const isN=N.includes(r);
+  panel.style.setProperty('--pc',r.c);
+  panel.innerHTML=`<div class="kind">${r.kind}${r.where?' · '+r.where:''}</div><h3>${r.name}</h3><p>${r.desc}</p>
+  <div class="tags">${r.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+  ${isN?`<div class="in">${r.s.map((v,i)=>`<div class="stat"><span>${SN[i]}</span><div class="bar"><i style="--w:${v*20}%;--c:${r.c}"></i></div></div>`).join('')}</div>`
+       :`<div class="danger" style="--c:${r.c}">위험도 ${[1,2,3,4,5].map(i=>`<i class="${i<=r.d?'f':''}"></i>`).join('')}</div>`}
+  <p class="hint">지도의 지역을 누르거나 아래에서 고르세요.</p>
+  <div class="chips">${ALL.map(x=>`<button type="button" data-id="${x.id}" style="--c:${x.c}" aria-pressed="${x.id===id}">${x.name}</button>`).join('')}</div>`;
+  panel.classList.remove('swap'); void panel.offsetWidth; panel.classList.add('swap');
+}
+rg.addEventListener('keydown',e=>{const t=e.target.closest('.rg'); if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();show(t.dataset.id)}});
+panel.addEventListener('click',e=>{const b=e.target.closest('button[data-id]'); if(b){show(b.dataset.id);const r=ALL.find(x=>x.id===b.dataset.id);fly(r.lx-250,r.ly-175,500,350);const t=fig.getBoundingClientRect().top;if(t<0||t>innerHeight*.5)fig.scrollIntoView({behavior:still2?'auto':'smooth',block:'center'})}});
+show('brins');
+
+/* 확대 · 축소 · 이동 */
+const fig=$('#fig'),svg=$('#mapsvg');
+const FW=1000,FH=700,MINW=220;
+let vb={x:0,y:0,w:FW,h:FH},anim=0;
+const apply=()=>svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+const clampV=()=>{vb.w=Math.min(FW,Math.max(MINW,vb.w));vb.h=vb.w*FH/FW;
+  vb.x=Math.min(FW-vb.w/2,Math.max(-vb.w/2,vb.x));vb.y=Math.min(FH-vb.h/2,Math.max(-vb.h/2,vb.y))};
+const scale=()=>{const b=svg.getBoundingClientRect();return Math.max(vb.w/b.width,vb.h/b.height)};
+const toSvg=(cx,cy)=>{const p=svg.createSVGPoint();p.x=cx;p.y=cy;return p.matrixTransform(svg.getScreenCTM().inverse())};
+const zoomAt=(f,cx,cy)=>{cancelAnimationFrame(anim);const p=toSvg(cx,cy);const nw=Math.min(FW,Math.max(MINW,vb.w*f)),k=nw/vb.w;
+  vb.x=p.x-(p.x-vb.x)*k;vb.y=p.y-(p.y-vb.y)*k;vb.w=nw;clampV();apply()};
+const centerZoom=f=>{const b=svg.getBoundingClientRect();zoomAt(f,b.left+b.width/2,b.top+b.height/2)};
+const still2=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function fly(x,y,w,h){cancelAnimationFrame(anim);const s={...vb},t={x,y,w,h},t0=performance.now();
+  const step=now=>{const k=still2?1:Math.min(1,(now-t0)/600),e=1-Math.pow(1-k,3);
+    for(const key of ['x','y','w'])vb[key]=s[key]+(t[key]-s[key])*e;clampV();apply();if(k<1)anim=requestAnimationFrame(step)};
+  anim=requestAnimationFrame(step)}
+$('#zin').addEventListener('click',()=>centerZoom(1/1.4));
+$('#zout').addEventListener('click',()=>centerZoom(1.4));
+$('#zreset').addEventListener('click',()=>fly(0,0,FW,FH));
+fig.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY>0?1.15:1/1.15,e.clientX,e.clientY)},{passive:false});
+const ptrs=new Map();let moved=false,pinch=0,start=null;
+svg.addEventListener('pointerdown',e=>{cancelAnimationFrame(anim);svg.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1){moved=false;start={x:e.clientX,y:e.clientY}}
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch=Math.hypot(a.x-b.x,a.y-b.y);moved=true}});
+svg.addEventListener('pointermove',e=>{const prev=ptrs.get(e.pointerId);if(!prev)return;const cur={x:e.clientX,y:e.clientY};
+  if(ptrs.size===1){if(!moved&&Math.hypot(cur.x-start.x,cur.y-start.y)>6){moved=true;fig.classList.add('drag')}
+    if(moved){const s=scale();vb.x-=(cur.x-prev.x)*s;vb.y-=(cur.y-prev.y)*s;clampV();apply()}}
+  ptrs.set(e.pointerId,cur);
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(pinch&&d){zoomAt(pinch/d,(a.x+b.x)/2,(a.y+b.y)/2)}pinch=d}});
+const end=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);
+  if(ptrs.size===0){fig.classList.remove('drag');
+    if(!moved&&e.type==='pointerup'){const el=document.elementFromPoint(e.clientX,e.clientY);const t=el&&el.closest('.rg');if(t)show(t.dataset.id)}}
+  if(ptrs.size<2)pinch=0;
+  if(ptrs.size===1){const [p]=[...ptrs.values()];start=p}};
+svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
+apply();
+
+/* 문장(紋章) */
+const crest=(c,i)=>{const g=[
+ '<path d="M28 10 L34 26 L28 46 L22 26Z" fill="'+c+'"/><path d="M14 30h28" stroke="'+c+'" stroke-width="3"/>',
+ '<circle cx="28" cy="28" r="9" fill="none" stroke="'+c+'" stroke-width="3"/><path d="M28 12v6M28 38v6M12 28h6M38 28h6" stroke="'+c+'" stroke-width="3"/>',
+ '<path d="M16 22l12-8 12 8v12c0 6-6 10-12 12-6-2-12-6-12-12Z" fill="none" stroke="'+c+'" stroke-width="3"/><path d="M28 22v14" stroke="'+c+'" stroke-width="3"/>',
+ '<path d="M14 38l4-16 6 8 4-12 4 12 6-8 4 16Z" fill="none" stroke="'+c+'" stroke-width="3"/><path d="M20 44l16-6" stroke="'+c+'" stroke-width="3"/>',
+ '<path d="M18 40l14-14M30 18l8 8-6 6-8-8Z" fill="none" stroke="'+c+'" stroke-width="3"/><circle cx="20" cy="38" r="3" fill="'+c+'"/>'][i];
+ return `<svg class="crest" viewBox="0 0 56 56"><path d="M28 3l23 9v16c0 13-10 21-23 25C15 49 5 41 5 28V12Z" fill="${c}" fill-opacity=".12" stroke="${c}" stroke-opacity=".6"/>${g}</svg>`};
+$('#ncards').innerHTML=N.map((n,i)=>`<article class="card rv" style="--c:${n.c}">${crest(n.c,i)}<div class="kind">${n.kind}</div><h3>${n.name}</h3><p>${n.desc}</p>
+${n.s.map((v,j)=>`<div class="stat"><span>${SN[j]}</span><div class="bar"><i style="--w:${v*20}%"></i></div></div>`).join('')}</article>`).join('');
+
+const icons={
+ tree:'<path d="M75 20 L120 95 H95 L130 140 H20 L55 95 H30Z" fill="currentColor"/>',
+ mine:'<path d="M20 130 L75 40 L130 130Z M60 130 v-30 h30 v30" fill="none" stroke="currentColor" stroke-width="8"/>',
+ flame:'<path d="M75 15c10 30 40 45 40 80a40 40 0 0 1-80 0c0-20 12-30 18-45 6 15 14 20 22 20-6-20-4-40 0-55Z" fill="currentColor"/>',
+ snow:'<path d="M75 15v120M23 45l104 60M23 105l104-60" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>'};
+$('#lcards').innerHTML=L.map(l=>`<article class="land rv" style="--c:${l.c}"><svg viewBox="0 0 150 150" style="color:${l.c}">${icons[l.icon]}</svg>
+<div class="where">${l.where} · ${l.kind}</div><h3>${l.name}</h3><p>${l.desc}</p>
+<div class="danger">위험도&nbsp;${[1,2,3,4,5].map(i=>`<i class="${i<=l.d?'f':''}"></i>`).join('')}</div></article>`).join('');
+$('#rlist').innerHTML=R.map(r=>`<div class="race" style="--c:${r.c}"><h3>${r.n}</h3><p>${r.p}</p></div>`).join('');
+
+/* 등장 효과 */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+/* 카드 기울기 */
+if(matchMedia('(pointer:fine)').matches){
+ document.querySelectorAll('.card').forEach(c=>{
+  c.addEventListener('pointermove',e=>{const b=c.getBoundingClientRect(),x=(e.clientX-b.left)/b.width,y=(e.clientY-b.top)/b.height;
+   c.style.setProperty('--mx',x*100+'%');c.style.setProperty('--my',y*100+'%');
+   c.style.setProperty('--ry',(x-.5)*8+'deg');c.style.setProperty('--rx',(.5-y)*8+'deg')});
+  c.addEventListener('pointerleave',()=>{c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg')});
+ });
+}
+
+/* 떠다니는 불티 */
+const cv=$('#motes'),cx=cv.getContext('2d');
+const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let W=0,H=0,ps=[];
+const size=()=>{const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+ ps=Array.from({length:Math.round(W*H/22000)},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+.4,v:Math.random()*.35+.1,a:Math.random()*6.28,h:Math.random()<.7?'224,120,80':'200,225,235'}))};
+const ro=new ResizeObserver(size);ro.observe(document.body);size();
+const tick=()=>{cx.clearRect(0,0,W,H);
+ for(const p of ps){p.y-=p.v;p.a+=.01;p.x+=Math.sin(p.a)*.3;if(p.y<-5){p.y=H+5;p.x=Math.random()*W}
+  const o=.35+.35*Math.sin(p.a*3);cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.28);cx.fillStyle=`rgba(${p.h},${o})`;cx.shadowBlur=8;cx.shadowColor=`rgba(${p.h},.8)`;cx.fill()}
+ if(!still) requestAnimationFrame(tick)};
+tick();
+}
+</script>
+</body>
+</html>
