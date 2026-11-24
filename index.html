@@ -196,7 +196,9 @@ nav .links{display:flex;gap:4px 18px;margin-left:auto;align-items:center}
 @media(max-width:600px){nav b{width:auto}html{scroll-padding-top:120px}}
 /* 세계관 */
 .lore{padding:12px 16px;color:var(--pink);display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:28px}
-.lore .lt{display:grid;gap:14px}
+.lore .lt{display:grid;gap:14px;align-content:start}
+.lore .yr{margin:0;font:700 15px/1 "Gowun Batang",serif;letter-spacing:.08em;color:#8e2a1f}
+.lore .lt p{font-size:18px}
 .lore h3{font-size:32px;color:var(--pink)}
 .lore p{color:#3d2b17}
 .lore blockquote{margin:6px 0 0;padding:14px 18px;border-left:3px solid #8e2a1f;font:22px/1.5 "Song Myung",serif;color:#5a1d12;background:rgba(255,248,228,.35)}
@@ -204,7 +206,8 @@ nav .links{display:flex;gap:4px 18px;margin-left:auto;align-items:center}
 .facts div{padding:14px 0;border-bottom:1px solid var(--pline)}
 .facts div:last-child{border-bottom:0}
 .facts dt{font-size:14px;color:var(--pmute)}
-.facts dd{margin:2px 0 0;font:20px/1.4 "Song Myung",serif;color:var(--pink)}
+.facts dd{margin:4px 0 0;font:24px/1.3 "Song Myung",serif;color:var(--pink)}
+.facts dt{line-height:1.5}
 @media(max-width:760px){.lore{grid-template-columns:minmax(0,1fr)}}
 /* 지배자 */
 .ruler .kind{margin-bottom:6px}
@@ -251,19 +254,20 @@ input:not([type=range]),textarea{cursor:text}
 </div></section>
 
 <section class="band" id="lore"><div class="wrap">
-<div class="head rv"><h2>세계관</h2><p>거대한 대륙 아르케니아. 다섯 나라와 네 개의 미지의 땅, 그리고 그 위를 살아가는 이들.</p></div>
+<div class="head rv"><h2>세계관</h2></div>
 <div class="lore rv">
 <div class="lt">
-<h3>아르케니아</h3>
-<p>거대한 대륙 아르케니아에는 두 제국과 세 왕국이 국경을 맞대고 있다. 무력의 브린스, 외교의 아슈림, 질서의 아비탈, 혼란의 루베치, 기술의 드루스터. 나라마다 힘을 얻는 방식은 다르지만 향하는 곳은 같다.</p>
-<p>국경 밖에는 인간의 법이 닿지 않는 네 개의 땅이 있다. 엘프의 숲 위그드라실, 드워프의 광산이자 미궁 니다벨리르, 강한 마수들이 들끓는 오염 지대 무스펠헤임, 그리고 강한 전사들이 있다는 소문만 전해지는 혹한의 니플헤임.</p>
-<blockquote>이곳은 방대하며, 누군가의 최고가 되기 위해 움직인다.</blockquote>
+<p class="yr">1437년</p>
+<h3>아르케니아 대륙</h3>
+<p>이곳은 거대한 대륙에 5개의 나라와 세력이 존재한다.</p>
+<p>그리고 거대한 대륙이니 만큼 여러 마수, 종족이 존재한다.</p>
+<blockquote>이곳은 방대하며 누군가의 최고가 되기 위해 움직인다.</blockquote>
 </div>
 <dl class="facts">
-<div><dt>나라</dt><dd>제국 둘 · 왕국 셋</dd></div>
-<div><dt>미지의 땅</dt><dd>네 곳</dd></div>
-<div><dt>주요 종족</dt><dd>인간 · 엘프 · 드워프 · 마수</dd></div>
-<div><dt>모험의 관문</dt><dd>드루스터 왕국</dd></div>
+<div><dt>엘프들이 지배하는 거대한 숲</dt><dd>위그드라실</dd></div>
+<div><dt>드워프들이 생활하는 남부의 거대한 광산이자 미궁</dt><dd>니다벨리르</dd></div>
+<div><dt>강한 마수들이 들끓고 오염된 지역</dt><dd>무스펠헤임</dd></div>
+<div><dt>혹독한 환경과 추운 북쪽에 위치하고 강한 전사들이 있을 거라는</dt><dd>니플헤임</dd></div>
 </dl>
 </div>
 </div></section>
